@@ -1,0 +1,15 @@
+# Example dataset configuration for 32GB AMD GPU
+# Adjust image_dir and num_repeats for your dataset
+
+[general]
+resolution = [960, 544]        # Width x Height (landscape I2V)
+caption_extension = ".txt"
+batch_size = 1                 # Keep at 1 for 32GB VRAM
+enable_bucket = true           # Automatic resolution bucketing
+bucket_no_upscale = true       # Don't upscale small images
+
+[[datasets]]
+image_dir = "./images"
+num_repeats = 8                # 8 repeats × N images × 32 epochs = total steps
+                               # 90 images → 90 × 8 × 32 = 23,040 steps
+                               # 50 images → 50 × 8 × 32 = 12,800 steps

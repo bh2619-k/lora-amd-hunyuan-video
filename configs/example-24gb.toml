@@ -1,0 +1,19 @@
+# Example dataset configuration for 24GB AMD GPU (e.g., RX 7900 XTX)
+# Uses lower dim and more aggressive offloading
+
+[general]
+resolution = [960, 544]
+caption_extension = ".txt"
+batch_size = 1
+enable_bucket = true
+bucket_no_upscale = true
+
+[[datasets]]
+image_dir = "./images"
+num_repeats = 8
+
+# Training command adjustments for 24GB:
+#   --network_dim 64           (half of 128, saves VRAM)
+#   --network_alpha 32         (half of dim)
+#   --blocks_to_swap 28        (more offloading to CPU)
+# Expected speed: ~8-12 s/step (slower due to more CPU offloading)
