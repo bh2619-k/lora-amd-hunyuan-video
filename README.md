@@ -362,6 +362,20 @@ This script checks:
 3. **SSD storage**: Cache files are read repeatedly. NVMe recommended.
 4. **`HSA_ENABLE_SDMA=0`**: Required for stability but costs ~10-15% speed.
 
+## ☕ Buy Me a Coffee
+
+If this guide saved you from the ROCm 7.0 crash loop or helped you train your first HunyuanVideo LoRA:
+
+<div align="center">
+
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy_Me_a_Coffee-PayPal-ff6b6b.svg)](https://www.paypal.com/ncp/payment/7ABKEV8WHA3KL)
+
+**[☕ Buy me a coffee](https://www.paypal.com/ncp/payment/7ABKEV8WHA3KL)**
+
+</div>
+
+Keeps the GPUs warm and the repos coming.
+
 ## Contributing
 
 Found a fix for another AMD GPU model? Training tips for different ROCm versions? PRs welcome.
