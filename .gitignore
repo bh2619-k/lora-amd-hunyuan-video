@@ -13,7 +13,6 @@ venv/
 env/
 
 # IDE
-.vscode/
 .idea/
 *.swp
 *.swo
@@ -34,5 +33,5 @@ cache/
 models/
 
 # Environment
-.env
-.env.local
+config.bat
+node_modules
