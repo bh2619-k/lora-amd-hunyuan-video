@@ -9,12 +9,14 @@ A complete, battle-tested guide for training HunyuanVideo 1.5 Image-to-Video LoR
 HunyuanVideo 1.5 is Tencent's latest video generation model with Image-to-Video (I2V) capability. Training LoRAs lets you teach it new characters, styles, or concepts. This guide covers the full pipeline on AMD GPUs with ROCm.
 
 **Tested on:**
+
 - AMD Radeon RX 9700 XT (32GB VRAM)
 - ROCm 7.2 (official AMD wheels)
 - Ubuntu 24.04 / Linux 6.17
 - musubi-tuner v0.2.15
 
 **Results achieved:**
+
 - 6,400 training steps in ~9 hours
 - Final loss: sub-0.001
 - Stable training with no crashes after proper setup
@@ -61,11 +63,11 @@ python -c "import torch; print(f'PyTorch {torch.__version__}'); print(f'ROCm ava
 
 ### fp8 Status on ROCm
 
-| Format | ROCm 7.0 | ROCm 7.2 | Notes |
-|--------|-----------|-----------|-------|
-| `e4m3fn` (NVIDIA format) | ❌ Broken | ✅ Works | Used by FLUX, HV1.5 fp8 checkpoints |
-| `e4m3fnuz` (AMD native) | ❌ Broken | ❌ Broken | hipBLAS unsupported for matmul |
-| `e5m2` | Untested | Untested | Rarely used |
+| Format                   | ROCm 7.0  | ROCm 7.2  | Notes                               |
+| ------------------------ | --------- | --------- | ----------------------------------- |
+| `e4m3fn` (NVIDIA format) | ❌ Broken | ✅ Works  | Used by FLUX, HV1.5 fp8 checkpoints |
+| `e4m3fnuz` (AMD native)  | ❌ Broken | ❌ Broken | hipBLAS unsupported for matmul      |
+| `e5m2`                   | Untested  | Untested  | Rarely used                         |
 
 **For training:** Use `bf16`. fp8 training is untested on ROCm 7.2 and bf16 is proven stable.
 
@@ -81,13 +83,13 @@ python scripts/check-rocm-fp8.py
 
 HunyuanVideo 1.5 I2V requires ~53GB of models:
 
-| Model | Size | Purpose |
-|-------|------|---------|
-| DiT I2V (bf16) | 33.3GB | Main diffusion transformer |
-| VAE | 4.7GB | Video autoencoder |
-| Qwen2.5-VL-7B | ~16GB | Text encoder |
-| BYT5-small | 419MB | Byte-level text encoder |
-| SigLIP clip_vision | 817MB | Image encoder (for I2V) |
+| Model              | Size   | Purpose                    |
+| ------------------ | ------ | -------------------------- |
+| DiT I2V (bf16)     | 33.3GB | Main diffusion transformer |
+| VAE                | 4.7GB  | Video autoencoder          |
+| Qwen2.5-VL-7B      | ~16GB  | Text encoder               |
+| BYT5-small         | 419MB  | Byte-level text encoder    |
+| SigLIP clip_vision | 817MB  | Image encoder (for I2V)    |
 
 ```bash
 # Download from HuggingFace (requires accepted license)
@@ -138,6 +140,7 @@ python scripts/caption-dataset.py --input ./dataset/ --model qwen2.5-vl-7b
 ```
 
 **Caption tips:**
+
 - Be specific and descriptive
 - Include consistent character identifiers (trigger words)
 - Describe pose, clothing, setting, lighting
@@ -253,18 +256,18 @@ python hv_1_5_train_network.py \
 
 ### Key Parameters Explained
 
-| Parameter | Value | Why |
-|-----------|-------|-----|
-| `--network_module` | `networks.lora_hv_1_5` | HV 1.5 specific (NOT `lora_hv`) |
-| `--network_dim` | 128 | Higher = more capacity. 64 is standard, 128 for max quality on 32GB+ |
-| `--network_alpha` | 64 | Half of dim is the standard ratio |
-| `--mixed_precision` | bf16 | Only stable option on AMD ROCm (fp8 training untested) |
-| `--optimizer_type` | adafactor | More stable than adamw8bit for LoRA training |
-| `--learning_rate` | 2e-5 | Conservative but stable. Range: 1e-5 to 5e-5 |
-| `--blocks_to_swap` | 20 | Offloads transformer blocks to CPU. Required for 32GB GPUs |
-| `--max_grad_norm` | 1.0 | **CRITICAL on AMD.** Without this, bf16 training goes NaN at step 2 |
-| `--lr_warmup_steps` | 50 | **CRITICAL on AMD.** Prevents gradient explosion at training start |
-| `--max_train_epochs` | 32 | With 8 repeats × ~90 images = ~6400 steps total |
+| Parameter            | Value                  | Why                                                                  |
+| -------------------- | ---------------------- | -------------------------------------------------------------------- |
+| `--network_module`   | `networks.lora_hv_1_5` | HV 1.5 specific (NOT `lora_hv`)                                      |
+| `--network_dim`      | 128                    | Higher = more capacity. 64 is standard, 128 for max quality on 32GB+ |
+| `--network_alpha`    | 64                     | Half of dim is the standard ratio                                    |
+| `--mixed_precision`  | bf16                   | Only stable option on AMD ROCm (fp8 training untested)               |
+| `--optimizer_type`   | adafactor              | More stable than adamw8bit for LoRA training                         |
+| `--learning_rate`    | 2e-5                   | Conservative but stable. Range: 1e-5 to 5e-5                         |
+| `--blocks_to_swap`   | 20                     | Offloads transformer blocks to CPU. Required for 32GB GPUs           |
+| `--max_grad_norm`    | 1.0                    | **CRITICAL on AMD.** Without this, bf16 training goes NaN at step 2  |
+| `--lr_warmup_steps`  | 50                     | **CRITICAL on AMD.** Prevents gradient explosion at training start   |
+| `--max_train_epochs` | 32                     | With 8 repeats × ~90 images = ~6400 steps total                      |
 
 ### ⚠️ bf16 Gradient Explosion (AMD-specific)
 
@@ -282,9 +285,9 @@ These significantly reduce throughput but prevent random `hipErrorIllegalAddress
 
 ### Expected Training Performance
 
-| GPU | Speed | 6400 Steps |
-|-----|-------|------------|
-| RX 9700 XT (32GB) | ~5.2 s/step | ~9 hours |
+| GPU                | Speed              | 6400 Steps   |
+| ------------------ | ------------------ | ------------ |
+| RX 9700 XT (32GB)  | ~5.2 s/step        | ~9 hours     |
 | RX 7900 XTX (24GB) | ~6-8 s/step (est.) | ~11-14 hours |
 
 ## Inference
@@ -294,6 +297,7 @@ These significantly reduce throughput but prevent random `hipErrorIllegalAddress
 ComfyUI natively supports HunyuanVideo 1.5 I2V. Place your LoRA in the `models/loras/` directory.
 
 **Key inference settings:**
+
 - CFG: 6.0 (non-distilled) or 1.0 (CFG-distilled checkpoint)
 - Shift: 7.0
 - Steps: 20-30
@@ -310,15 +314,15 @@ ComfyUI natively supports HunyuanVideo 1.5 I2V. Place your LoRA in the `models/l
 
 ### Common Issues & Solutions
 
-| Problem | Cause | Solution |
-|---------|-------|----------|
-| `hipErrorIllegalAddress` at random steps | PyTorch nightly ROCm bug | Use official AMD ROCm 7.2 wheels |
-| NaN loss at step 2 | bf16 gradient explosion | Add `--max_grad_norm 1.0` AND `--lr_warmup_steps 50` |
-| Text encoder crashes on GPU | Qwen2.5-VL memory issue on AMD | Use `--device cpu` for text encoder caching |
-| `clip_vision.py` shape error | Expects H,W,C but gets C,H,W | Patch musubi-tuner's `clip_vision.py` with shape transpose |
-| Import errors with `lora_hv_1_5` | Wrong musubi-tuner version | Ensure v0.2.15+ (`pip install -e .` from latest git) |
-| Training crash at steps 33-77 | ROCm 7.0 block_swap bug | Upgrade to ROCm 7.2 |
-| OOM during caching | VAE on GPU with large images | Reduce `--vae_chunk_size` or lower source image resolution |
+| Problem                                  | Cause                          | Solution                                                   |
+| ---------------------------------------- | ------------------------------ | ---------------------------------------------------------- |
+| `hipErrorIllegalAddress` at random steps | PyTorch nightly ROCm bug       | Use official AMD ROCm 7.2 wheels                           |
+| NaN loss at step 2                       | bf16 gradient explosion        | Add `--max_grad_norm 1.0` AND `--lr_warmup_steps 50`       |
+| Text encoder crashes on GPU              | Qwen2.5-VL memory issue on AMD | Use `--device cpu` for text encoder caching                |
+| `clip_vision.py` shape error             | Expects H,W,C but gets C,H,W   | Patch musubi-tuner's `clip_vision.py` with shape transpose |
+| Import errors with `lora_hv_1_5`         | Wrong musubi-tuner version     | Ensure v0.2.15+ (`pip install -e .` from latest git)       |
+| Training crash at steps 33-77            | ROCm 7.0 block_swap bug        | Upgrade to ROCm 7.2                                        |
+| OOM during caching                       | VAE on GPU with large images   | Reduce `--vae_chunk_size` or lower source image resolution |
 
 ### The musubi-tuner CLIP Vision Bug
 
@@ -337,6 +341,7 @@ python scripts/check-rocm-fp8.py
 ```
 
 This script checks:
+
 - PyTorch ROCm availability
 - GPU detection and VRAM
 - bf16 support
@@ -347,13 +352,13 @@ This script checks:
 
 ### VRAM Usage (32GB GPU, blocks_to_swap=20)
 
-| Phase | VRAM Usage |
-|-------|------------|
-| Latent caching | ~8-12GB |
-| Text encoder caching (CPU) | ~2GB GPU |
-| Training (bf16, dim128) | ~28-30GB |
-| Inference (bf16) | ~30GB |
-| Inference (fp8) | ~17GB |
+| Phase                      | VRAM Usage |
+| -------------------------- | ---------- |
+| Latent caching             | ~8-12GB    |
+| Text encoder caching (CPU) | ~2GB GPU   |
+| Training (bf16, dim128)    | ~28-30GB   |
+| Inference (bf16)           | ~30GB      |
+| Inference (fp8)            | ~17GB      |
 
 ### Optimizing Training Speed
 
@@ -361,20 +366,6 @@ This script checks:
 2. **`max_data_loader_n_workers`**: 2-4 depending on CPU cores.
 3. **SSD storage**: Cache files are read repeatedly. NVMe recommended.
 4. **`HSA_ENABLE_SDMA=0`**: Required for stability but costs ~10-15% speed.
-
-## ☕ Buy Me a Coffee
-
-If this guide saved you from the ROCm 7.0 crash loop or helped you train your first HunyuanVideo LoRA:
-
-<div align="center">
-
-[![Buy Me a Coffee](https://img.shields.io/badge/Buy_Me_a_Coffee-PayPal-ff6b6b.svg)](https://www.paypal.com/ncp/payment/7ABKEV8WHA3KL)
-
-**[☕ Buy me a coffee](https://www.paypal.com/ncp/payment/7ABKEV8WHA3KL)**
-
-</div>
-
-Keeps the GPUs warm and the repos coming.
 
 ## Contributing
 
